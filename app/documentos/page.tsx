@@ -150,7 +150,7 @@ export default function DocumentosPage() {
 
       <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-500">
-          <FileText size={17} /> As alterações serão usadas nos próximos agendamentos.
+          <FileText size={17} /> Salve uma vez e este modelo será usado automaticamente nos próximos agendamentos.
         </div>
         <button
           type="button"
@@ -159,7 +159,7 @@ export default function DocumentosPage() {
           className="w-full sm:w-auto min-w-52 bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-60"
         >
           {salvando ? <Loader2 size={18} className="animate-spin" /> : salvo ? <CheckCircle2 size={18} /> : null}
-          {salvando ? "Salvando..." : salvo ? "Alterações salvas" : "Salvar documentos"}
+          {salvando ? "Salvando..." : salvo ? "Salvo para os próximos" : "Salvar para os próximos agendamentos"}
         </button>
       </div>
     </div>
