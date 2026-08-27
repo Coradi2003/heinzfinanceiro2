@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #C9797F;
+  --color-primary-dark: #AA6067;
+  --color-background: #FFF7F7;
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-secondary: #A66B82;
+  --color-secondary-dark: #8B566B;
+  --color-background: var(--color-background);
+  --color-card: #FFFFFF;
+}
+
+body {
+  background-color: var(--color-background);
+  color: #111827; /* text-gray-900 */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === DARK THEME SMART OVERRIDES === */
+.dark-theme body, .dark-theme main { background-color: var(--color-background) !important; color: #F3F4F6 !important; }
+
+/* Blocks and Backgrounds */
+.dark-theme .bg-white { background-color: #1F2937 !important; border-color: #374151 !important; }
+.dark-theme .bg-gray-50 { background-color: #374151 !important; border-color: #4B5563 !important; }
+.dark-theme .bg-gray-100 { background-color: #4B5563 !important; }
+
+/* Texts */
+.dark-theme .text-gray-900 { color: #F9FAFB !important; }
+.dark-theme .text-gray-800 { color: #f3f4f6 !important; }
+.dark-theme .text-gray-700 { color: #D1D5DB !important; }
+.dark-theme .text-gray-600 { color: #9CA3AF !important; }
+.dark-theme .text-gray-500 { color: #9CA3AF !important; }
+.dark-theme .text-gray-400 { color: #6B7280 !important; }
+
+/* Borders */
+.dark-theme .border-gray-50 { border-color: #374151 !important; }
+.dark-theme .border-gray-100 { border-color: #374151 !important; }
+.dark-theme .border-gray-200 { border-color: #4B5563 !important; }
+
+.dark-theme input, .dark-theme select, .dark-theme textarea { 
+  background-color: #374151 !important; 
+  color: #F9FAFB !important; 
+  border-color: #4B5563 !important; 
+}
+
+/* === PRINT STYLES === */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body, main, .flex {
+    background-color: white !important;
+    color: black !important;
+    overflow: visible !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  /* Reset layout for print */
+  .h-screen {
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+.print-only {
+  display: none;
+}
