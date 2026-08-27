@@ -12,7 +12,7 @@ import {
   Wallet, 
   Scissors, 
   Package, 
-  BadgeDollarSign,
+  FileText,
   Settings,
   LogOut,
   Menu,
@@ -29,7 +29,7 @@ const menuItems = [
   { name: "Clientes", href: "/clientes", icon: Users },
   { name: "Serviços", href: "/servicos", icon: Scissors },
   { name: "Produtos", href: "/produtos", icon: Package },
-  { name: "Tabela de Preços", href: "/tabela-precos", icon: BadgeDollarSign },
+  { name: "Documentos", href: "/documentos", icon: FileText },
   { name: "Configurações", href: "/configuracoes", icon: Settings },
 ];
 
