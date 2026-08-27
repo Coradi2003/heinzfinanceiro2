@@ -28,17 +28,26 @@ export default function ConfiguracoesPage() {
   
   const fundos = [
     { nome: "Blush Suave", bg: "#FFF7F7" },
-    { nome: "Rosa Névoa", bg: "#FDF0F1" },
-    { nome: "Creme Delicado", bg: "#FFF9F3" },
-    { nome: "Lavanda Clara", bg: "#FAF7FC" },
-    { nome: "Nude", bg: "#F8F1ED" },
-    { nome: "Pérola", bg: "#FCFAF8" },
+    { nome: "Creme Delicado", bg: "#FFF2E2" },
+    { nome: "Rosa Vintage", bg: "#E9BEC7" },
+    { nome: "Lavanda Rosé", bg: "#D8C2E3" },
+    { nome: "Pêssego", bg: "#F2BEA9" },
+    { nome: "Malva Suave", bg: "#CDA9C7" },
   ];
   const [fundoAtivo, setFundoAtivo] = useState(fundos[0].bg);
 
   useEffect(() => {
     if (corSalva) setCorAtiva(corSalva);
-    if (bgSalvo) setFundoAtivo(bgSalvo);
+    if (bgSalvo) {
+      const fundosAnteriores: Record<string, string> = {
+        "#FDF0F1": "#E9BEC7",
+        "#FFF9F3": "#FFF2E2",
+        "#FAF7FC": "#D8C2E3",
+        "#F8F1ED": "#F2BEA9",
+        "#FCFAF8": "#CDA9C7",
+      };
+      setFundoAtivo(fundosAnteriores[bgSalvo] || bgSalvo);
+    }
   }, [corSalva, bgSalvo]);
 
   // Mostra a cor de fundo imediatamente enquanto a pessoa escolhe.
