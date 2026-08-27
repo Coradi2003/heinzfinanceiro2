@@ -36,13 +36,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-10 mt-4">
-          <div className="relative w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-white shadow-2xl shadow-primary/30 ring-4 ring-primary/10 transition-transform hover:scale-105 duration-500">
+          <div className="relative w-40 h-40 mx-auto mb-6 rounded-3xl overflow-hidden border-4 border-white bg-[#E38F85] shadow-2xl shadow-primary/30 ring-4 ring-primary/10 transition-transform hover:scale-105 duration-500">
             <Image 
               src="/logo.jpeg" 
               alt="Logo Studio Paty Heinz" 
               fill 
-              className="object-cover"
-              sizes="128px"
+              className="object-contain"
+              sizes="160px"
               priority
             />
           </div>

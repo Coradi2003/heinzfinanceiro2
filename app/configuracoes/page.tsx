@@ -41,6 +41,17 @@ export default function ConfiguracoesPage() {
     if (bgSalvo) setFundoAtivo(bgSalvo);
   }, [corSalva, bgSalvo]);
 
+  // Mostra a cor de fundo imediatamente enquanto a pessoa escolhe.
+  // Se sair sem salvar, o tema persistido volta a ser aplicado.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--color-background", fundoAtivo);
+
+    return () => {
+      root.style.setProperty("--color-background", bgSalvo || "#FFF7F7");
+    };
+  }, [fundoAtivo, bgSalvo]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -89,9 +100,6 @@ export default function ConfiguracoesPage() {
             ))}
           </div>
 
-          <button onClick={handleSaveColor} className="w-full bg-primary text-white font-bold py-3.5 rounded-xl transition hover:opacity-90">
-             {loadingConfig ? "Salvando..." : "Salvar Preferências"}
-          </button>
         </div>
 
         {/* Bloco de Fundos */}
@@ -102,19 +110,46 @@ export default function ConfiguracoesPage() {
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             {fundos.map(f => (
-              <div 
+              <button
+                type="button"
                 key={f.bg}
                 onClick={() => setFundoAtivo(f.bg)}
-                className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer transition ${fundoAtivo === f.bg ? 'border-primary ring-1 ring-primary bg-primary/5' : 'border-gray-100 hover:border-gray-200'}`}
+                className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition text-left ${fundoAtivo === f.bg ? 'border-primary ring-1 ring-primary' : 'border-gray-100 hover:border-gray-200'}`}
+                style={{
+                  background: `linear-gradient(135deg, ${f.bg} 0%, ${f.bg} 58%, #FFFFFF 58%, #FFFFFF 100%)`,
+                }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full border border-gray-200" style={{ backgroundColor: f.bg }}></div>
+                  <div
+                    className="w-10 h-8 rounded-lg border border-gray-300 shadow-inner shrink-0"
+                    style={{ backgroundColor: f.bg }}
+                  ></div>
                   <span className="text-sm font-semibold text-gray-700">{f.nome}</span>
                 </div>
                 {fundoAtivo === f.bg && <CheckCircle2 size={16} className="text-primary" />}
-              </div>
+              </button>
             ))}
           </div>
+
+          <div
+            className="rounded-2xl border border-gray-200 p-4 mb-6 transition-colors duration-300"
+            style={{ backgroundColor: fundoAtivo }}
+          >
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Prévia do fundo</p>
+            <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+              <p className="font-bold text-gray-800">Studio Paty Heinz</p>
+              <p className="text-xs text-gray-500 mt-1">Assim os cartões aparecerão sobre o fundo escolhido.</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSaveColor}
+            disabled={loadingConfig}
+            className="w-full bg-primary text-white font-bold py-3.5 rounded-xl transition hover:opacity-90 disabled:opacity-60"
+          >
+            {loadingConfig ? "Salvando..." : "Salvar Cores do Aplicativo"}
+          </button>
         </div>
 
         {/* Zona de Perigo / Conta */}

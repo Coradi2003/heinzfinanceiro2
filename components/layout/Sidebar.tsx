@@ -57,8 +57,8 @@ export function Sidebar() {
       {/* MOBILE TOP BAR */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-100 w-full shrink-0 no-print">
         <Link href="/" className="flex items-center gap-3 group">
-           <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md shadow-primary/20 ring-1 ring-primary/5 group-hover:scale-105 transition-transform duration-300">
-             <Image src="/logo.jpeg" alt="Studio Paty Heinz" fill className="object-cover" sizes="40px" />
+           <div className="relative w-10 h-10 rounded-xl overflow-hidden border-2 border-white bg-[#E38F85] shadow-md shadow-primary/20 ring-1 ring-primary/5 group-hover:scale-105 transition-transform duration-300">
+             <Image src="/logo.jpeg" alt="Studio Paty Heinz" fill className="object-contain" sizes="40px" />
            </div>
            <span className="font-black text-lg text-gray-900 tracking-tight uppercase">Studio Paty Heinz</span>
         </Link>
@@ -85,13 +85,13 @@ export function Sidebar() {
 
         {/* Logo and Branding */}
       <Link href="/" onClick={() => setIsOpen(false)} className="pt-10 pb-8 border-b border-gray-50 flex flex-col items-center justify-center gap-4 group">
-        <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-primary/20 ring-2 ring-primary/5 group-hover:scale-105 transition-transform duration-300">
+        <div className="relative w-32 h-32 rounded-3xl overflow-hidden border-4 border-white bg-[#E38F85] shadow-xl shadow-primary/20 ring-2 ring-primary/5 group-hover:scale-105 transition-transform duration-300">
            <Image 
              src="/logo.jpeg" 
              alt="Studio Paty Heinz" 
              fill 
-             className="object-cover"
-             sizes="112px"
+             className="object-contain"
+             sizes="128px"
              priority
            />
         </div>
