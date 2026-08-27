@@ -97,11 +97,53 @@ create table if not exists public.tabela_precos (
   created_at timestamptz not null default now()
 );
 
+-- Migração segura para bancos que já tinham a tabela de transações.
+alter table public.transacoes
+  add column if not exists agendamento_id uuid;
+
+alter table public.transacoes
+  drop constraint if exists transacoes_agendamento_id_fkey;
+
+alter table public.transacoes
+  add constraint transacoes_agendamento_id_fkey
+  foreign key (agendamento_id)
+  references public.agendamentos(id)
+  on delete cascade;
+
+-- Vincula lançamentos antigos aos respectivos agendamentos quando houver
+-- correspondência exata de cliente, serviço e valor.
+update public.transacoes as t
+set agendamento_id = a.id
+from public.agendamentos as a
+where t.agendamento_id is null
+  and t.user_id = a.user_id
+  and t.categoria in ('Sinal de Procedimento', 'Sinal de Tatuagem')
+  and t.descricao = concat('Sinal - ', a."clienteNome", ' (', a.servico, ')')
+  and abs(t.valor - a."valorSinal") < 0.01;
+
+update public.transacoes as t
+set agendamento_id = a.id
+from public.agendamentos as a
+where t.agendamento_id is null
+  and t.user_id = a.user_id
+  and t.categoria = 'Sessão Concluída'
+  and t.descricao = concat('Restante - ', a."clienteNome", ' (', a.servico, ')')
+  and abs(t.valor - (a."valorTotal" - a."valorSinal")) < 0.01;
+
+-- Remove somente lançamentos automáticos antigos cujo agendamento já não existe.
+delete from public.transacoes
+where agendamento_id is null
+  and (
+    (categoria in ('Sinal de Procedimento', 'Sinal de Tatuagem') and descricao like 'Sinal - %')
+    or (categoria = 'Sessão Concluída' and descricao like 'Restante - %')
+  );
+
 create index if not exists clientes_user_id_idx on public.clientes(user_id);
 create index if not exists servicos_user_id_idx on public.servicos(user_id);
 create index if not exists produtos_user_id_idx on public.produtos(user_id);
 create index if not exists agendamentos_user_data_idx on public.agendamentos(user_id, "dataInicio");
 create index if not exists transacoes_user_data_idx on public.transacoes(user_id, data desc);
+create index if not exists transacoes_agendamento_id_idx on public.transacoes(agendamento_id);
 create index if not exists despesas_fixas_user_idx on public.despesas_fixas(user_id, vencimento);
 create index if not exists tabela_precos_user_ordem_idx on public.tabela_precos(user_id, ordem);
 
@@ -114,22 +156,29 @@ alter table public.despesas_fixas enable row level security;
 alter table public.configuracoes enable row level security;
 alter table public.tabela_precos enable row level security;
 
-do $$
-declare
-  table_name text;
-begin
-  foreach table_name in array array[
-    'clientes', 'servicos', 'produtos', 'agendamentos',
-    'transacoes', 'despesas_fixas', 'configuracoes', 'tabela_precos'
-  ]
-  loop
-    execute format('drop policy if exists "Usuário gerencia os próprios dados" on public.%I', table_name);
-    execute format(
-      'create policy "Usuário gerencia os próprios dados" on public.%I for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id)',
-      table_name
-    );
-  end loop;
-end $$;
+drop policy if exists "Usuário gerencia os próprios dados" on public.clientes;
+create policy "Usuário gerencia os próprios dados" on public.clientes for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.servicos;
+create policy "Usuário gerencia os próprios dados" on public.servicos for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.produtos;
+create policy "Usuário gerencia os próprios dados" on public.produtos for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.agendamentos;
+create policy "Usuário gerencia os próprios dados" on public.agendamentos for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.transacoes;
+create policy "Usuário gerencia os próprios dados" on public.transacoes for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.despesas_fixas;
+create policy "Usuário gerencia os próprios dados" on public.despesas_fixas for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.configuracoes;
+create policy "Usuário gerencia os próprios dados" on public.configuracoes for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Usuário gerencia os próprios dados" on public.tabela_precos;
+create policy "Usuário gerencia os próprios dados" on public.tabela_precos for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- Bucket público para as imagens dos atendimentos. Os arquivos ficam separados
 -- pelo UUID do usuário: agendamentos/<user_id>/<arquivo>.webp.

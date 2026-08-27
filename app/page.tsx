@@ -115,15 +115,18 @@ export default function DashboardPage() {
 
   // -- CARDS DE STATUS --
   // Aprovados: O que foi concluído no período selecionado
-  const aprovadosTot = agndsPeriodo.filter(a => a.status === 'concluido').reduce((acc, curr) => acc + curr.valorTotal, 0);
+  const aprovadosTot = agndsPeriodo.filter(a => a.status === 'concluido').reduce((acc, curr) => acc + Number(curr.valorTotal || 0), 0);
   
   // Pendentes: O que está agendado/pendente no período selecionado
   const agndsFuturos = agndsPeriodo.filter(a => a.status === 'agendado' || a.status === 'pendente');
-  const pendentesTot = agndsFuturos.reduce((acc, curr) => acc + (curr.valorTotal - (curr.valorSinal || 0)), 0);
+  const pendentesTot = agndsFuturos.reduce(
+    (acc, curr) => acc + Math.max(0, Number(curr.valorTotal || 0) - Number(curr.valorSinal || 0)),
+    0
+  );
   
   // Rejeitados: Cancelados no período selecionado
   const agndsRejeitados = agndsPeriodo.filter(a => a.status === 'cancelado');
-  const rejeitadosTot = agndsRejeitados.reduce((acc, curr) => acc + curr.valorTotal, 0);
+  const rejeitadosTot = agndsRejeitados.reduce((acc, curr) => acc + Number(curr.valorTotal || 0), 0);
 
   // -- GRÁFICO ANUAL: receitas financeiras por mês do ano selecionado --
   const vendasPorMes = MESES.map(m => {
@@ -136,6 +139,9 @@ export default function DashboardPage() {
   const maxVendasMes = Math.max(...vendasPorMes.map(v => v.total), 1);
 
   const pendentesCount = agendamentos.filter(a => a.status === 'pendente' || a.status === 'agendado').length;
+  const pendentesTotalGeral = agendamentos
+    .filter(a => a.status === 'pendente' || a.status === 'agendado')
+    .reduce((total, a) => total + Math.max(0, Number(a.valorTotal || 0) - Number(a.valorSinal || 0)), 0);
   const concluidosCount = agendamentos.filter(a => a.status === 'concluido').length;
 
   // -- ANIVERSARIANTES DO DIA --
@@ -448,6 +454,7 @@ export default function DashboardPage() {
           </div>
           <h3 className="text-xl font-bold text-gray-800">{pendentesCount}</h3>
           <p className="text-[10px] uppercase font-bold text-gray-400">Pendentes</p>
+          <p className="text-xs font-black text-yellow-700 mt-1">{pendentesTotalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
         </button>
 
         <button 

@@ -10,6 +10,7 @@ export interface Transacao {
   metodo: 'Dinheiro' | 'Cartão' | 'Pix';
   data: string; // ISO String
   conta: string;
+  agendamento_id?: string | null;
 }
 
 export interface DespesaFixa {
@@ -69,6 +70,7 @@ export const useFinanceiroStore = create<FinanceiroStore>()((set) => ({
       set((state) => ({ transacoes: [insertedData as Transacao, ...state.transacoes] }));
     } else if (error) {
        console.error(error);
+       throw error;
     }
   },
 
