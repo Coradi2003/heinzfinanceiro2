@@ -21,6 +21,33 @@ const moeda = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+function carregarImagem(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const imagem = new window.Image();
+    imagem.onload = () => resolve(imagem);
+    imagem.onerror = () => reject(new Error("Não foi possível carregar a logo"));
+    imagem.src = src;
+  });
+}
+
+function quebrarTexto(ctx: CanvasRenderingContext2D, texto: string, larguraMaxima: number): string[] {
+  const palavras = texto.trim().split(/\s+/).filter(Boolean);
+  if (palavras.length === 0) return [];
+  const linhas: string[] = [];
+  let linha = palavras[0];
+
+  for (let i = 1; i < palavras.length; i++) {
+    const teste = `${linha} ${palavras[i]}`;
+    if (ctx.measureText(teste).width <= larguraMaxima) linha = teste;
+    else {
+      linhas.push(linha);
+      linha = palavras[i];
+    }
+  }
+  linhas.push(linha);
+  return linhas;
+}
+
 export default function TabelaPrecosPage() {
   const { itens, carregando, adicionarItem, atualizarItem, removerItem, moverItem } = useTabelaPrecosStore();
   const tabelaRef = useRef<HTMLDivElement>(null);
@@ -76,17 +103,112 @@ export default function TabelaPrecosPage() {
   };
 
   const gerarImagem = async (): Promise<File | null> => {
-    if (!tabelaRef.current || itens.length === 0) return null;
+    if (itens.length === 0) return null;
     setGerando(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(tabelaRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
+      const largura = 1080;
+      const alturaCabecalho = 330;
+      const alturaRodape = 150;
+      const alturasItens = itens.map((item) => 105 + (item.descricao ? 38 : 0));
+      const altura = alturaCabecalho + alturasItens.reduce((soma, atual) => soma + atual, 0) + alturaRodape;
+      const canvas = document.createElement("canvas");
+      canvas.width = largura;
+      canvas.height = altura;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas não disponível neste dispositivo");
+
+      const gradiente = ctx.createLinearGradient(0, 0, largura, altura);
+      gradiente.addColorStop(0, "#C9797F");
+      gradiente.addColorStop(0.55, "#A66B82");
+      gradiente.addColorStop(1, "#6F3856");
+      ctx.fillStyle = gradiente;
+      ctx.fillRect(0, 0, largura, altura);
+
+      ctx.fillStyle = "rgba(255,255,255,0.07)";
+      for (let y = 30; y < altura; y += 100) {
+        for (let x = 40; x < largura; x += 120) {
+          ctx.beginPath();
+          ctx.arc(x + ((y / 100) % 2) * 35, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      const logo = await carregarImagem("/logo.jpeg");
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(72, 62, 170, 170, 32);
+      ctx.clip();
+      ctx.drawImage(logo, 72, 62, 170, 170);
+      ctx.restore();
+      ctx.strokeStyle = "rgba(255,255,255,0.75)";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.roundRect(72, 62, 170, 170, 32);
+      ctx.stroke();
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "900 55px Arial, sans-serif";
+      ctx.fillText("Studio Paty Heinz", 280, 135);
+      ctx.fillStyle = "rgba(255,255,255,0.78)";
+      ctx.font = "700 25px Arial, sans-serif";
+      ctx.fillText("INVISTA EM VOCÊ", 282, 184);
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "900 31px Arial, sans-serif";
+      ctx.fillText("TABELA DE PREÇOS", 72, 292);
+
+      let y = alturaCabecalho;
+      itens.forEach((item, indice) => {
+        const alturaItem = alturasItens[indice];
+        ctx.strokeStyle = "rgba(255,255,255,0.28)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(72, y);
+        ctx.lineTo(largura - 72, y);
+        ctx.stroke();
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "700 31px Arial, sans-serif";
+        const linhasNome = quebrarTexto(ctx, item.nome, 610);
+        linhasNome.slice(0, 2).forEach((linha, linhaIndice) => {
+          ctx.fillText(linha, 72, y + 48 + linhaIndice * 36);
+        });
+
+        ctx.textAlign = "right";
+        ctx.font = "900 32px Arial, sans-serif";
+        ctx.fillText(moeda.format(Number(item.valor)), largura - 72, y + 48);
+        if (item.duracao) {
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = "600 22px Arial, sans-serif";
+          ctx.fillText(item.duracao, largura - 72, y + 82);
+        }
+        ctx.textAlign = "left";
+
+        if (item.descricao) {
+          ctx.fillStyle = "rgba(255,255,255,0.75)";
+          ctx.font = "400 22px Arial, sans-serif";
+          const linhasDescricao = quebrarTexto(ctx, item.descricao, 610);
+          ctx.fillText(linhasDescricao[0] || "", 72, y + 102);
+        }
+        y += alturaItem;
       });
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png", 1));
+
+      ctx.strokeStyle = "rgba(255,255,255,0.28)";
+      ctx.beginPath();
+      ctx.moveTo(72, y);
+      ctx.lineTo(largura - 72, y);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.textAlign = "center";
+      ctx.font = "500 21px Arial, sans-serif";
+      ctx.fillText("Valores sujeitos a alteração. Consulte disponibilidade.", largura / 2, y + 72);
+
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
       return blob ? new File([blob], "tabela-de-precos-paty-heinz.png", { type: "image/png" }) : null;
+    } catch (error) {
+      console.error("Erro ao gerar tabela de preços:", error);
+      alert("Não foi possível gerar a imagem. Atualize o aplicativo e tente novamente.");
+      return null;
     } finally {
       setGerando(false);
     }
@@ -95,15 +217,21 @@ export default function TabelaPrecosPage() {
   const compartilhar = async () => {
     const arquivo = await gerarImagem();
     if (!arquivo) return;
-    if (navigator.share && navigator.canShare?.({ files: [arquivo] })) {
-      await navigator.share({
-        title: "Tabela de Preços - Studio Paty Heinz",
-        text: "Confira nossa tabela de preços ✨",
-        files: [arquivo],
-      });
-      return;
+    try {
+      if (navigator.share && navigator.canShare?.({ files: [arquivo] })) {
+        await navigator.share({
+          title: "Tabela de Preços - Studio Paty Heinz",
+          text: "Confira nossa tabela de preços ✨",
+          files: [arquivo],
+        });
+        return;
+      }
+      baixarArquivo(arquivo);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      console.error("Erro ao compartilhar:", error);
+      baixarArquivo(arquivo);
     }
-    baixarArquivo(arquivo);
   };
 
   const baixar = async () => {
@@ -116,8 +244,11 @@ export default function TabelaPrecosPage() {
     const link = document.createElement("a");
     link.href = url;
     link.download = arquivo.name;
+    link.style.display = "none";
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 3000);
   };
 
   return (
