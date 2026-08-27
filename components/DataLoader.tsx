@@ -7,6 +7,7 @@ import { useProdutosStore } from "@/store/useProdutosStore";
 import { useServicosStore } from "@/store/useServicosStore";
 import { useConfigStore } from "@/store/useConfigStore";
 import { useClientesStore } from "@/store/useClientesStore";
+import { useTabelaPrecosStore } from "@/store/useTabelaPrecosStore";
 import { createClient } from "@/lib/supabase";
 
 export function DataLoader() {
@@ -17,6 +18,7 @@ export function DataLoader() {
   const carregarServicos = useServicosStore(state => state.carregarServicos);
   const carregarConfiguracao = useConfigStore(state => state.carregarConfiguracao);
   const carregarClientes = useClientesStore(state => state.carregarClientes);
+  const carregarTabelaPrecos = useTabelaPrecosStore(state => state.carregarItens);
 
   useEffect(() => {
     const supabase = createClient();
@@ -30,6 +32,7 @@ export function DataLoader() {
       carregarServicos();
       carregarConfiguracao();
       carregarClientes();
+      carregarTabelaPrecos();
     };
 
     // Escuta mudanças de autenticação (login, refresh de token, etc)

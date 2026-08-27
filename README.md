@@ -1,8 +1,8 @@
 # Studio Paty Heinz
 
 Sistema de gestão para estúdio de beleza, com agenda, clientes, serviços,
-produtos, financeiro, relatórios, documentos personalizados e instalação como
-PWA.
+produtos, financeiro, relatórios, tabela de preços compartilhável e instalação
+como PWA.
 
 ## Configuração local
 

@@ -86,12 +86,24 @@ create table if not exists public.configuracoes (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.tabela_precos (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  nome text not null,
+  descricao text not null default '',
+  valor numeric(12,2) not null default 0 check (valor >= 0),
+  duracao text not null default '',
+  ordem integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists clientes_user_id_idx on public.clientes(user_id);
 create index if not exists servicos_user_id_idx on public.servicos(user_id);
 create index if not exists produtos_user_id_idx on public.produtos(user_id);
 create index if not exists agendamentos_user_data_idx on public.agendamentos(user_id, "dataInicio");
 create index if not exists transacoes_user_data_idx on public.transacoes(user_id, data desc);
 create index if not exists despesas_fixas_user_idx on public.despesas_fixas(user_id, vencimento);
+create index if not exists tabela_precos_user_ordem_idx on public.tabela_precos(user_id, ordem);
 
 alter table public.clientes enable row level security;
 alter table public.servicos enable row level security;
@@ -100,6 +112,7 @@ alter table public.agendamentos enable row level security;
 alter table public.transacoes enable row level security;
 alter table public.despesas_fixas enable row level security;
 alter table public.configuracoes enable row level security;
+alter table public.tabela_precos enable row level security;
 
 do $$
 declare
@@ -107,7 +120,7 @@ declare
 begin
   foreach table_name in array array[
     'clientes', 'servicos', 'produtos', 'agendamentos',
-    'transacoes', 'despesas_fixas', 'configuracoes'
+    'transacoes', 'despesas_fixas', 'configuracoes', 'tabela_precos'
   ]
   loop
     execute format('drop policy if exists "Usuário gerencia os próprios dados" on public.%I', table_name);
