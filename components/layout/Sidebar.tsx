@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { 
@@ -12,7 +12,6 @@ import {
   Wallet, 
   Scissors, 
   Package, 
-  FileText, 
   Settings,
   LogOut,
   Menu,
@@ -29,13 +28,11 @@ const menuItems = [
   { name: "Clientes", href: "/clientes", icon: Users },
   { name: "Serviços", href: "/servicos", icon: Scissors },
   { name: "Produtos", href: "/produtos", icon: Package },
-  { name: "Documentos", href: "/contrato", icon: FileText },
   { name: "Configurações", href: "/configuracoes", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const supabase = createClient();
   const [isOpen, setIsOpen] = useState(false);
 
