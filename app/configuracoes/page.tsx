@@ -45,10 +45,10 @@ export default function ConfiguracoesPage() {
   // Se sair sem salvar, o tema persistido volta a ser aplicado.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--color-background", fundoAtivo);
+    root.style.setProperty("--app-background", fundoAtivo);
 
     return () => {
-      root.style.setProperty("--color-background", bgSalvo || "#FFF7F7");
+      root.style.setProperty("--app-background", bgSalvo || "#FFF7F7");
     };
   }, [fundoAtivo, bgSalvo]);
 

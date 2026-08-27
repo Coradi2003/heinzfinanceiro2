@@ -1,28 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #C9797F;
-  --color-primary-dark: #AA6067;
-  --color-background: #FFF7F7;
+  --app-primary: #C9797F;
+  --app-primary-dark: #AA6067;
+  --app-background: #FFF7F7;
 }
 
 @theme {
-  --color-primary: var(--color-primary);
-  --color-primary-dark: var(--color-primary-dark);
+  --color-primary: var(--app-primary);
+  --color-primary-dark: var(--app-primary-dark);
   --color-secondary: #A66B82;
   --color-secondary-dark: #8B566B;
-  --color-background: var(--color-background);
+  --color-background: var(--app-background);
   --color-card: #FFFFFF;
 }
 
 body {
-  background-color: var(--color-background);
+  background-color: var(--app-background);
   color: #111827; /* text-gray-900 */
   -webkit-font-smoothing: antialiased;
 }
 
 /* === DARK THEME SMART OVERRIDES === */
-.dark-theme body, .dark-theme main { background-color: var(--color-background) !important; color: #F3F4F6 !important; }
+.dark-theme body, .dark-theme main { background-color: var(--app-background) !important; color: #F3F4F6 !important; }
 
 /* Blocks and Backgrounds */
 .dark-theme .bg-white { background-color: #1F2937 !important; border-color: #374151 !important; }

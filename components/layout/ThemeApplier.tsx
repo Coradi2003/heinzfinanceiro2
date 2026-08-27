@@ -44,9 +44,9 @@ export function ThemeApplier() {
     const primary = classToHex(corHexa);
     const background = normalizeHex(bgHexa);
 
-    root.style.setProperty("--color-primary", primary);
-    root.style.setProperty("--color-primary-dark", darken(primary));
-    root.style.setProperty("--color-background", background);
+    root.style.setProperty("--app-primary", primary);
+    root.style.setProperty("--app-primary-dark", darken(primary));
+    root.style.setProperty("--app-background", background);
 
     if (isDark(background)) root.classList.add("dark-theme");
     else root.classList.remove("dark-theme");
