@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useClientesStore, Cliente } from "@/store/useClientesStore";
-import { MessageCircle, Gift, CalendarClock, User, Plus, Pencil, Trash2, Search, MoreVertical, Phone, Tag, Trash, Cake } from "lucide-react";
+import { MessageCircle, Gift, User, Plus, Pencil, Trash2, Search, MoreVertical, Phone, Tag, Trash, Cake } from "lucide-react";
 import { ModalCliente } from "@/components/clientes/ModalCliente";
 
 export default function ClientesPage() {
@@ -110,13 +110,7 @@ export default function ClientesPage() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setMenuAberto(null)} />
                     <div className="absolute right-6 top-16 w-56 bg-[#1f2636] border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right py-2">
-                       <p className="px-4 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 mb-1">Lembretes WhatsApp</p>
-                       <button onClick={() => handleWhatsApp(c.telefone, 'Oi! Passando só pra confirmar sua sessão amanhã!')} className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-gray-300 hover:bg-primary hover:text-white transition-all group/item">
-                         <CalendarClock size={16} className="text-primary group-hover/item:text-white" /> 1 Dia Antes
-                       </button>
-                       <button onClick={() => handleWhatsApp(c.telefone, 'E aí, tudo pronto? Sua sessão é daqui a 1 hora!')} className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-gray-300 hover:bg-primary hover:text-white transition-all group/item">
-                         <CalendarClock size={16} className="text-orange-500 group-hover/item:text-white" /> 1 Hora Antes
-                       </button>
+                       <p className="px-4 py-2 text-[10px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5 mb-1">Contato WhatsApp</p>
                        <button onClick={() => handleWhatsApp(c.telefone, 'Parabéns pelo seu aniversário!')} className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-gray-300 hover:bg-primary hover:text-white transition-all group/item">
                          <Gift size={16} className="text-pink-500 group-hover/item:text-white" /> Mensagem B-Day
                        </button>

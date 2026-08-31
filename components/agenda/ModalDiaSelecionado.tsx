@@ -3,7 +3,7 @@
 import { Modal } from "@/components/ui/Modal";
 import { format, isToday, parseISO, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { User, CheckCircle2, MessageCircle, Trash2, Pencil, Image as ImageIcon, X, RotateCcw } from "lucide-react";
+import { User, CheckCircle2, MessageCircle, Trash2, Pencil, Image as ImageIcon, X, RotateCcw, CalendarClock, BellRing } from "lucide-react";
 import { Agendamento, useAgendaStore } from "@/store/useAgendaStore";
 import { useState } from "react";
 import { ModalAgendamento } from "./ModalAgendamento";
@@ -15,6 +15,30 @@ interface ModalDiaSelecionadoProps {
   agendamentos: Agendamento[];
   concluirAtendimento: (id: string, metodo: 'Pix' | 'Dinheiro' | 'Cartão') => void;
   removeAgendamento: (id: string) => void;
+}
+
+function numeroWhatsApp(telefone?: string): string {
+  const digitos = (telefone || "").replace(/\D/g, "");
+  if (!digitos) return "";
+  return digitos.startsWith("55") ? digitos : `55${digitos}`;
+}
+
+function abrirLembreteWhatsApp(agendamento: Agendamento, tipo: "dia" | "hora") {
+  const numero = numeroWhatsApp(agendamento.telefone);
+  if (!numero) {
+    alert("Este agendamento não possui telefone cadastrado.");
+    return;
+  }
+
+  const inicio = parseISO(agendamento.dataInicio);
+  const primeiroNome = (agendamento.clienteNome || "cliente").trim().split(/\s+/)[0];
+  const data = format(inicio, "dd/MM/yyyy");
+  const horario = format(inicio, "HH:mm");
+  const mensagem = tipo === "dia"
+    ? `Olá, ${primeiroNome}! 🌸 Passando para lembrar do seu agendamento amanhã, dia ${data}, às ${horario}, para ${agendamento.servico}, no Studio Paty Heinz. Se precisar, fale com a gente por aqui. Até logo!`
+    : `Olá, ${primeiroNome}! 🌸 Seu agendamento para ${agendamento.servico} é daqui a 1 hora, às ${horario}, no Studio Paty Heinz. Estamos te esperando!`;
+
+  window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`, "_blank");
 }
 
 export function ModalDiaSelecionado({ isOpen, onClose, selectedDate, agendamentos, concluirAtendimento, removeAgendamento }: ModalDiaSelecionadoProps) {
@@ -82,13 +106,37 @@ export function ModalDiaSelecionado({ isOpen, onClose, selectedDate, agendamento
                   </div>
                 )}
               </div>
+
+              {agendamento.status !== 'concluido' && agendamento.status !== 'cancelado' && (
+                <div className="ml-3 mb-3 rounded-xl border border-primary/15 bg-primary/5 p-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 flex items-center gap-1.5">
+                    <BellRing size={13} className="text-primary" /> Lembretes WhatsApp
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => abrirLembreteWhatsApp(agendamento, "dia")}
+                      className="flex items-center justify-center gap-1.5 rounded-lg bg-white border border-primary/15 px-2 py-2.5 text-xs font-bold text-primary hover:bg-primary hover:text-white transition"
+                    >
+                      <CalendarClock size={15} /> 1 dia antes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => abrirLembreteWhatsApp(agendamento, "hora")}
+                      className="flex items-center justify-center gap-1.5 rounded-lg bg-white border border-orange-200 px-2 py-2.5 text-xs font-bold text-orange-600 hover:bg-orange-500 hover:text-white transition"
+                    >
+                      <CalendarClock size={15} /> 1 hora antes
+                    </button>
+                  </div>
+                </div>
+              )}
               
                   <div className="flex flex-wrap md:flex-nowrap gap-2 pl-3 border-t border-gray-50 pt-3 mt-3">
                     <button 
                       onClick={() => {
-                        const numberOnly = (agendamento.telefone || '').replace(/\D/g, '');
+                        const numberOnly = numeroWhatsApp(agendamento.telefone);
                         if (numberOnly) {
-                          window.open(`https://wa.me/55${numberOnly}`, '_blank');
+                          window.open(`https://wa.me/${numberOnly}`, '_blank');
                         } else {
                           alert('Este cliente não possui telefone cadastrado.');
                         }
