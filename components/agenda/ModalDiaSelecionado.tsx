@@ -1,9 +1,9 @@
 "use client";
 
 import { Modal } from "@/components/ui/Modal";
-import { format, isToday, parseISO, isSameDay } from "date-fns";
+import { format, isToday, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { User, CheckCircle2, MessageCircle, Trash2, Pencil, Image as ImageIcon, X, RotateCcw, CalendarClock, BellRing } from "lucide-react";
+import { User, CheckCircle2, MessageCircle, Trash2, Pencil, Image as ImageIcon, X, RotateCcw, BellRing } from "lucide-react";
 import { Agendamento, useAgendaStore } from "@/store/useAgendaStore";
 import { useState } from "react";
 import { ModalAgendamento } from "./ModalAgendamento";
@@ -23,20 +23,27 @@ function numeroWhatsApp(telefone?: string): string {
   return digitos.startsWith("55") ? digitos : `55${digitos}`;
 }
 
-function abrirLembreteWhatsApp(agendamento: Agendamento, tipo: "dia" | "hora") {
+function dataHoraLocal(valor: string): Date {
+  const [data, hora = "00:00"] = valor.split("T");
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const [horas, minutos] = hora.substring(0, 5).split(":").map(Number);
+  return new Date(ano, mes - 1, dia, horas || 0, minutos || 0);
+}
+
+function abrirLembreteWhatsApp(agendamento: Agendamento) {
   const numero = numeroWhatsApp(agendamento.telefone);
   if (!numero) {
     alert("Este agendamento não possui telefone cadastrado.");
     return;
   }
 
-  const inicio = parseISO(agendamento.dataInicio);
+  // Os horários do Studio são gravados como hora local. Extrair os componentes
+  // evita que o navegador converta 07:00 UTC para 04:00 em Brasília.
+  const inicio = dataHoraLocal(agendamento.dataInicio);
   const primeiroNome = (agendamento.clienteNome || "cliente").trim().split(/\s+/)[0];
   const data = format(inicio, "dd/MM/yyyy");
   const horario = format(inicio, "HH:mm");
-  const mensagem = tipo === "dia"
-    ? `Olá, ${primeiroNome}! 🌸 Passando para lembrar do seu agendamento amanhã, dia ${data}, às ${horario}, para ${agendamento.servico}, no Studio Paty Heinz. Se precisar, fale com a gente por aqui. Até logo!`
-    : `Olá, ${primeiroNome}! 🌸 Seu agendamento para ${agendamento.servico} é daqui a 1 hora, às ${horario}, no Studio Paty Heinz. Estamos te esperando!`;
+  const mensagem = `Olá, ${primeiroNome}! 🌸 Passando para lembrar do seu horário no Studio Paty Heinz no dia ${data}, às ${horario}, para ${agendamento.servico}. Se precisar, fale com a gente por aqui. Até logo!`;
 
   window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`, "_blank");
 }
@@ -48,8 +55,8 @@ export function ModalDiaSelecionado({ isOpen, onClose, selectedDate, agendamento
   const [concluindoId, setConcluindoId] = useState<string | null>(null);
 
   const agendamentosDia = agendamentos
-    .filter(a => isSameDay(parseISO(a.dataInicio), selectedDate))
-    .sort((a,b) => parseISO(a.dataInicio).getTime() - parseISO(b.dataInicio).getTime());
+    .filter(a => isSameDay(dataHoraLocal(a.dataInicio), selectedDate))
+    .sort((a,b) => dataHoraLocal(a.dataInicio).getTime() - dataHoraLocal(b.dataInicio).getTime());
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={isToday(selectedDate) ? "Hoje" : format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}>
@@ -112,20 +119,13 @@ export function ModalDiaSelecionado({ isOpen, onClose, selectedDate, agendamento
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 flex items-center gap-1.5">
                     <BellRing size={13} className="text-primary" /> Lembretes WhatsApp
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div>
                     <button
                       type="button"
-                      onClick={() => abrirLembreteWhatsApp(agendamento, "dia")}
-                      className="flex items-center justify-center gap-1.5 rounded-lg bg-white border border-primary/15 px-2 py-2.5 text-xs font-bold text-primary hover:bg-primary hover:text-white transition"
+                      onClick={() => abrirLembreteWhatsApp(agendamento)}
+                      className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary text-white px-3 py-2.5 text-xs font-bold hover:opacity-90 transition shadow-sm shadow-primary/20"
                     >
-                      <CalendarClock size={15} /> 1 dia antes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => abrirLembreteWhatsApp(agendamento, "hora")}
-                      className="flex items-center justify-center gap-1.5 rounded-lg bg-white border border-orange-200 px-2 py-2.5 text-xs font-bold text-orange-600 hover:bg-orange-500 hover:text-white transition"
-                    >
-                      <CalendarClock size={15} /> 1 hora antes
+                      <BellRing size={15} /> Enviar lembrete
                     </button>
                   </div>
                 </div>
